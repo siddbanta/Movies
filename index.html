@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,  minimum-scale=1.0">
+    <title>CineStream Ultra V2 - Full Feature Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #e50914;
+            --secondary-color: #101010;
+            --text-color: #f5f5f1;
+            --card-bg: #181818;
+            --hover-color: #f40612;
+            --border-color: #282828;
+            --font-main: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --success-color: #4CAF50;
+            --error-color: #F44336;
+
+            --premium-border-color: #3a3a3a;
+            --module-bg: #1f1f1f;
+            --module-header-bg: #2a2a2a;
+            --input-bg: #282828;
+            --input-border: #444;
+            --soft-shadow-dark: 0 6px 18px rgba(0,0,0,0.3);
+
+            --header-height-desktop: 70px;
+            --header-height-mobile: 60px;
+            --sidebar-width: 170px; /* 160px ad + 10px padding/gap */
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            font-size: 16px;
+            overflow-x: hidden;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: var(--border-color);
+            margin: clamp(30px, 5vw, 50px) 0;
+        }
+
+        /* --- Header --- */
+        header {
+            background-color: rgba(12, 12, 12, 0.97);
+            padding: 0.8em 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0; left: 0; z-index: 1000;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.6);
+            height: var(--header-height-desktop);
+        }
+        header .logo {
+            font-size: clamp(1.4em, 4vw, 2em);
+            font-weight: 900;
+            color: var(--primary-color);
+            text-decoration: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        header nav ul { list-style: none; display: flex; align-items: center; }
+        header nav ul li { margin-left: clamp(15px, 3vw, 25px); }
+        header nav ul li a {
+            color: var(--text-color); text-decoration: none;
+            font-size: clamp(0.9em, 2.2vw, 1em); font-weight: 500;
+            transition: color 0.3s ease, transform 0.2s ease, border-bottom-color 0.3s ease;
+            padding: 0.6em 0.3em; border-bottom: 2px solid transparent;
+        }
+        header nav ul li a:hover, header nav ul li a.active {
+            color: var(--primary-color); border-bottom-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+        .menu-toggle { display: none; font-size: 2em; color: var(--text-color); background: none; border: none; cursor: pointer; padding: 5px; }
+
+
+        /* --- Main Content Layout --- */
+        main {
+            padding: 20px 5%;
+            padding-top: calc(var(--header-height-desktop) + 20px);
+            padding-bottom: 70px;
+            min-height: 100vh;
+        }
+        .main-content-wrapper {
+            display: flex;
+            gap: 20px; /* Gap between content and sidebar */
+        }
+        .content-area {
+            flex-grow: 1;
+            min-width: 0; /* Important for flex item to shrink properly */
+        }
+        .sidebar-ads {
+            width: var(--sidebar-width);
+            flex-shrink: 0;
+            position: sticky; /* Make sidebar sticky */
+            top: calc(var(--header-height-desktop) + 20px); /* Align with main content padding-top */
+            height: calc(100vh - var(--header-height-desktop) - 40px); /* Adjust height based on viewport and padding */
+            overflow-y: auto; /* Allow scrolling if content overflows */
+        }
+
+        main > section, .content-area > section { /* Ensure sections take scroll margin */
+             scroll-margin-top: calc(var(--header-height-desktop) + 15px); 
+        }
+
+
+        .section-title {
+            margin-bottom: 25px; font-size: clamp(1.7em, 4.5vw, 2.4em);
+            color: var(--text-color); border-left: 6px solid var(--primary-color);
+            padding-left: 15px; font-weight: 700;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+        }
+
+        /* Search Form */
+        .search-container {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: var(--soft-shadow-dark);
+            border: 1px solid var(--premium-border-color);
+        }
+        #searchForm {
+            display: flex;
+            flex-grow: 1;
+            gap: 10px;
+        }
+        #searchInput {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border: 1px solid var(--input-border);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1em;
+        }
+        #searchInput:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.3);
+            outline: none;
+        }
+        #searchForm button {
+            padding: 12px 20px;
+            background-image: linear-gradient(to bottom, var(--primary-color), #c00812);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-image 0.3s ease, transform 0.2s ease;
+        }
+        #searchForm button:hover {
+            background-image: linear-gradient(to bottom, var(--hover-color), #d30710);
+            transform: translateY(-1px);
+        }
+        .no-results-message {
+            text-align: center;
+            font-size: 1.2em;
+            color: #aaa;
+            padding: 40px 20px;
+            width: 100%;
+        }
+
+
+        /* Movie Grid & Cards */
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: clamp(18px, 3.5vw, 28px); }
+        .movie-card {
+            background-color: var(--card-bg); border-radius: 10px; overflow: hidden;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer; display: flex; flex-direction: column;
+        }
+        .movie-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+        }
+        .movie-card img { width: 100%; height: 300px; object-fit: cover; display: block; border-bottom: 1px solid var(--border-color); }
+        .movie-card-content {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .movie-card-content > div:first-child { 
+            margin-bottom: 10px; 
+        }
+        .movie-card h3 { font-size: clamp(1em, 2.8vw, 1.15em); margin: 0 0 8px 0; color: var(--text-color); font-weight: 600; line-height: 1.3; }
+        .movie-card p { font-size: clamp(0.85em, 1.8vw, 0.9em); color: #b0b0b0; margin-bottom: 0; }
+        
+        .movie-card-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto; 
+        }
+        .movie-card-actions .play-button {
+            flex-grow: 1;
+            margin-right: 8px;
+            background-image: linear-gradient(to bottom, var(--primary-color), #c00812);
+            color: white;
+            padding: 10px 15px; text-decoration: none; border-radius: 6px;
+            font-size: clamp(0.9em, 2.5vw, 1em); text-align: center;
+            transition: background-image 0.3s ease, transform 0.2s ease;
+            font-weight: 600;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.15);
+        }
+        .movie-card-actions .play-button:hover {
+            background-image: linear-gradient(to bottom, var(--hover-color), #d30710);
+            transform: scale(1.03) translateY(-1px);
+        }
+        .like-button {
+            background-color: transparent;
+            border: 1px solid var(--premium-border-color);
+            color: var(--text-color);
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: clamp(0.8em, 2vw, 0.9em);
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .like-button:hover {
+            background-color: var(--module-header-bg);
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+        .like-button .like-icon {
+            font-size: 1.1em;
+            transition: color 0.2s ease;
+        }
+        .like-button.liked .like-icon {
+            color: var(--primary-color);
+        }
+        .like-button.liked {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        .player-like-btn { 
+            margin-left: 10px;
+            padding: 6px 12px;
+        }
+        .movie-info #movie-likes-player {
+            font-weight: bold;
+        }
+        .share-button { 
+            background-color: transparent;
+            border: 1px solid var(--premium-border-color);
+            color: var(--text-color);
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: clamp(0.8em, 2vw, 0.9em);
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
+            display: inline-flex; 
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            margin-left: 10px; 
+        }
+        .share-button:hover {
+            background-color: var(--module-header-bg);
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+        .share-button .share-icon {
+            font-size: 1.1em;
+        }
+        .player-share-btn { 
+            padding: 6px 12px;
+        }
+
+
+        /* --- Movie Player --- */
+        .movie-player-section {
+            background-color: var(--card-bg); padding: clamp(25px, 4vw, 35px); margin-top: 35px;
+            border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color);
+        }
+        .ad-container { /* For 320x50 ad */
+            background-color: #2a2a2a; text-align: center; padding: clamp(10px, 2vw, 15px);
+            margin-bottom: 20px; border: 1px dashed #444; border-radius: 5px;
+            min-height: 50px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+         .ad-container-skyscraper { /* For 160x600 ad */
+            width: 160px; 
+            min-height: 600px; 
+            margin: 0 auto 20px auto; /* Centered in its column */
+            background-color: var(--module-bg); 
+            border: 1px dashed var(--premium-border-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px; /* Small padding around the ad */
+        }
+        .video-wrapper {
+            background-color: black; margin-bottom: 20px; position: relative;
+            padding-top: 56.25%; border-radius: 8px; overflow: hidden;
+        }
+        .video-wrapper video {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .movie-info h3 { margin-top: 0; font-size: clamp(1.4em, 3.5vw, 1.8em); font-weight: 700; margin-bottom: 8px; }
+        .movie-info p { color: #ccc; font-size: clamp(0.9em, 2.3vw, 1em); margin-bottom: 8px; }
+        .movie-info strong { color: var(--primary-color); }
+
+
+        /* --- Admin Panel --- */
+        .admin-section {
+            background-color: var(--secondary-color);
+            padding: clamp(20px, 3vw, 25px) clamp(10px, 2vw, 15px);
+            margin-top: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .admin-section > h2 {
+            color: var(--text-color);
+            font-weight: 700;
+            margin-bottom: 25px;
+            font-size: clamp(1.6em, 4vw, 2em);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+            display: inline-block;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .admin-module {
+            background-color: var(--module-bg);
+            padding: 0;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: var(--soft-shadow-dark);
+            border: 1px solid var(--premium-border-color);
+            overflow: hidden;
+        }
+        .admin-module-header {
+            background-color: var(--module-header-bg);
+            padding: clamp(12px, 2.5vw, 15px) clamp(15px, 3vw, 20px);
+            border-bottom: 1px solid var(--premium-border-color);
+        }
+        .admin-module-header h3 {
+            color: var(--text-color);
+            font-weight: 600;
+            margin: 0;
+            font-size: clamp(1.1em, 2.8vw, 1.3em);
+            line-height: 1.3;
+        }
+        .admin-module-header h3 .icon-placeholder {
+            margin-right: 8px;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+        .admin-module-content {
+            padding: clamp(15px, 3vw, 20px);
+        }
+
+        .admin-section label {
+            display: block; margin-bottom: 8px; color: #b0b0b0;
+            font-weight: 500; font-size: 0.9em;
+        }
+        .admin-section input[type="text"],
+        .admin-section input[type="password"],
+        .admin-section input[type="url"],
+        .admin-section input[type="file"],
+        .admin-section input[type="search"],
+        .admin-section textarea {
+            width: 100%; padding: 12px 15px; margin-bottom: 20px; border-radius: 6px;
+            border: 1px solid var(--input-border);
+            background-color: var(--input-bg); color: var(--text-color);
+            font-size: 1em;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .admin-section input:focus, .admin-section textarea:focus, .admin-section input[type="search"]:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.3);
+            outline: none;
+        }
+        .file-upload-note {
+            display: block; margin-top: -12px; margin-bottom: 15px;
+            color: #aaa; font-size: 0.85em; font-style: italic;
+            line-height: 1.4;
+        }
+
+
+        .admin-section button, .admin-module-content button:not(.delete-btn) {
+            background-image: linear-gradient(to bottom, var(--primary-color), #c00812);
+            color: white; padding: 12px 25px;
+            border: none; border-radius: 6px; cursor: pointer;
+            font-size: clamp(0.9em, 2.5vw, 1em);
+            font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+            transition: background-image 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            width: 100%; margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.15);
+        }
+        .admin-section button:hover, .admin-module-content button:not(.delete-btn):hover {
+            background-image: linear-gradient(to bottom, var(--hover-color), #d30710);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        #adminLogoutBtn {
+            width: auto; display: block;
+            margin: 15px auto 0 auto;
+            padding: 10px 22px;
+            background-image: linear-gradient(to bottom, #555, #333);
+        }
+        #adminLogoutBtn:hover {
+            background-image: linear-gradient(to bottom, #666, #444);
+        }
+
+        .delete-btn {
+            background-color: var(--error-color); color: white;
+            padding: 7px 12px; font-size: clamp(0.8em, 2.2vw, 0.85em);
+            border-radius: 5px; line-height: 1.2; min-width: 70px;
+            text-align: center; font-weight: 500;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            border: none; text-transform: capitalize;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: #D32F2F; transform: translateY(-1px);
+        }
+
+        .stats-table { width: 100%; border-collapse: collapse; margin-top: 0; font-size: clamp(0.8em, 2.5vw, 0.9em); }
+        .stats-table th, .stats-table td { border: 1px solid var(--premium-border-color); padding: 12px; text-align: left; }
+        .stats-table th {
+            background-color: var(--module-header-bg); font-weight: 600;
+            text-transform: uppercase; font-size: 0.85em; letter-spacing: 0.5px; color: #ccc;
+        }
+        .stats-table td { background-color: var(--module-bg); border-bottom: 1px solid var(--premium-border-color); }
+        .stats-table tr:last-child td { border-bottom: none; }
+        .stats-table td:last-child { text-align: center; }
+
+        .form-message {
+            padding: 12px 15px; margin-bottom: 20px; border-radius: 6px;
+            text-align: center; font-weight: 500;
+            border-left: 4px solid;
+        }
+        .success { background-color: rgba(76, 175, 80, 0.1); color: #90ee90; border-left-color: var(--success-color); }
+        .error { background-color: rgba(244, 67, 54, 0.1); color: #ff7f7f; border-left-color: var(--error-color); }
+
+
+        /* Analysis Section */
+        #viewsChartContainer {
+            width: 100%; max-width: 650px; margin: 0 auto;
+        }
+        #viewsChartContainer canvas {
+            max-height: 380px;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center; padding: 30px 5%; background-color: #0a0a0a;
+            color: #999; margin-top: 40px; font-size: clamp(0.85em, 2vw, 0.9em);
+            border-top: 1px solid var(--border-color);
+        }
+        footer a { color: #aaa; text-decoration: none; transition: color 0.3s ease; }
+        footer a:hover { color: var(--primary-color); }
+
+        /* Utility Classes */
+        .hidden { display: none !important; }
+        
+        /* Fallback Share Modal CSS */
+        .share-modal {
+            display: none; 
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+        }
+        .share-modal.active {
+            display: flex; 
+        }
+        .share-modal-content {
+            background-color: var(--card-bg);
+            margin: auto;
+            padding: 25px;
+            border: 1px solid var(--premium-border-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+        }
+        .share-modal-close {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .share-modal-close:hover,
+        .share-modal-close:focus {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .share-modal h4 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            color: var(--text-color);
+        }
+        #shareLinkInputModal {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            color: var(--text-color);
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .share-modal-actions button, .share-modal-actions a.social-button {
+            background-image: linear-gradient(to bottom, var(--primary-color), #c00812);
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+            min-width: 120px;
+            transition: background-image 0.3s ease, transform 0.2s ease;
+        }
+        .share-modal-actions button:hover, .share-modal-actions a.social-button:hover {
+            background-image: linear-gradient(to bottom, var(--hover-color), #d30710);
+            transform: translateY(-1px);
+        }
+        .share-modal-actions a.social-button.whatsapp {
+            background-image: linear-gradient(to bottom, #25D366, #128C7E);
+        }
+         .share-modal-actions a.social-button.whatsapp:hover {
+            background-image: linear-gradient(to bottom, #1DAE51, #075E54);
+        }
+        .share-modal-actions a.social-button.twitter {
+            background-image: linear-gradient(to bottom, #1DA1F2, #0c85d0);
+        }
+        .share-modal-actions a.social-button.twitter:hover {
+            background-image: linear-gradient(to bottom, #0d95e8, #0a6fab);
+        }
+         .share-modal-actions a.social-button.facebook {
+            background-image: linear-gradient(to bottom, #1877F2, #1055a8);
+        }
+        .share-modal-actions a.social-button.facebook:hover {
+            background-image: linear-gradient(to bottom, #166fe5, #0e4a93);
+        }
+
+
+        /* Responsive Adjustments */
+        @media (max-width: 960px) { /* Breakpoint for sidebar stacking */
+            .main-content-wrapper {
+                flex-direction: column;
+            }
+            .sidebar-ads {
+                width: 100%; 
+                margin-top: 30px; /* Space when stacked */
+                position: static; /* Remove sticky positioning */
+                height: auto; /* Adjust height */
+            }
+            .ad-container-skyscraper {
+                /* You might want to center it or make it responsive here */
+                margin: 0 auto 20px auto; /* Center it if it's narrower than full width */
+            }
+        }
+
+        @media (max-width: 768px) {
+            header { height: var(--header-height-mobile); padding: 0.7em 4%;}
+            main { padding-top: calc(var(--header-height-mobile) + 15px); }
+            main > section, .content-area > section { scroll-margin-top: calc(var(--header-height-mobile) + 10px); }
+
+            header nav ul {
+                display: none; flex-direction: column; position: absolute;
+                top: var(--header-height-mobile);
+                left: 0; width: 100%; background-color: rgba(12, 12, 12, 0.99);
+                padding: 0.5em 0; box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+            }
+            header nav ul.active { display: flex; }
+            header nav ul li { margin: 0; text-align: center; width: 100%; }
+            header nav ul li a { display: block; padding: 0.8em 0; width:100%; border-bottom: 1px solid var(--border-color);}
+            header nav ul li:last-child a { border-bottom: none; }
+            .menu-toggle { display: block; }
+
+            .search-container { flex-direction: column; padding: 10px; }
+            #searchForm { width: 100%; }
+            #searchInput { font-size: 0.95em; }
+            #searchForm button { font-size: 0.9em; padding: 10px 15px; }
+
+
+            .movie-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+            .movie-card img { height: 220px; }
+            
+            .admin-section button, .admin-module-content button:not(.delete-btn) {
+                font-size: 0.9em; padding: 12px 18px;
+            }
+             #adminLogoutBtn, .delete-btn {
+                font-size: clamp(0.8em, 2.2vw, 0.9em); padding: 8px 15px;
+            }
+            .admin-section > h2 { font-size: clamp(1.4em, 3.5vw, 1.8em); }
+            .admin-module-header h3 { font-size: clamp(1.05em, 2.5vw, 1.2em); }
+
+            .stats-table { font-size: 0.8em; }
+            .stats-table th, .stats-table td { padding: 10px 8px; }
+        }
+
+        @media (max-width: 480px) {
+            main { padding-top: calc(var(--header-height-mobile) + 10px); padding-bottom: 20px; }
+            main > section, .content-area > section { scroll-margin-top: calc(var(--header-height-mobile) + 5px); }
+            header { height: var(--header-height-mobile); padding: 0.6em 3%; }
+            header .logo { font-size: 1.2em; }
+            .section-title { font-size: 1.3em; padding-left: 10px; border-left-width: 4px;}
+
+            .search-container { gap: 8px; }
+            #searchInput { padding: 10px 12px; }
+
+            .movie-card-actions .play-button,
+            .movie-card-actions .like-button,
+            .player-share-btn {
+                font-size: 0.8em;
+                padding: 8px 10px;
+            }
+            .like-button, .share-button { 
+                padding: 6px 8px;
+            }
+
+            .admin-section { padding: 15px 10px; }
+            .admin-module-content { padding: 15px; }
+            .admin-module-header { padding: 10px 15px; }
+
+            .admin-section input[type="text"],
+            .admin-section input[type="password"],
+            .admin-section input[type="url"],
+            .admin-section input[type="file"],
+            .admin-section input[type="search"],
+            .admin-section textarea { padding: 10px 12px; font-size: 0.95em; }
+
+
+            .admin-section button, .admin-module-content button:not(.delete-btn) {
+                font-size: 0.85em; padding: 10px 15px;
+            }
+            #adminLogoutBtn, .delete-btn {
+                font-size: 0.75em; padding: 7px 10px; min-width: 60px;
+            }
+            .stats-table { font-size: 0.7em; }
+            .stats-table th, .stats-table td { padding: 6px; }
+            .form-message { padding: 10px; margin-bottom: 15px; font-size: 0.9em; }
+            .share-modal-content { padding: 20px; }
+            .share-modal-actions button, .share-modal-actions a.social-button {
+                 font-size: 0.85em; padding: 8px 12px; min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="#home" class="logo">CineStream Ultra</a>
+        <button class="menu-toggle" id="menuToggleBtn" aria-label="Toggle Menu" aria-expanded="false">☰</button>
+        <nav id="mainNav">
+            <ul>
+                <li><a href="#home" class="nav-link">Home</a></li>
+                <li><a href="#movies" class="nav-link">All Movies</a></li>
+                <li><a href="#player-section" class="nav-link">Now Playing</a></li>
+                <li><a href="#" id="adminLoginBtn" class="nav-link">Admin</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="main-content-wrapper">
+            <div class="content-area">
+                <section id="movies" class="movie-listing-section">
+                    <h2 class="section-title">Featured Movies</h2>
+                    <div class="search-container">
+                        <form id="searchForm">
+                            <input type="search" id="searchInput" placeholder="Search movies by title...">
+                            <button type="submit">Search</button>
+                        </form>
+                    </div>
+                    <div class="movie-grid" id="movieGridContainer">
+                         <p class="no-results-message">No movies uploaded yet. Please log in as admin to add movies.</p>
+                    </div>
+                </section>
+
+                <hr>
+
+                <section id="player-section" class="movie-player-section">
+                    <h2 class="section-title" id="playing-movie-title">Select a movie to play</h2>
+                    
+                    <!-- AD SLOT 1: 320x50 Banner (Original Ad) -->
+                    <div id="ad-slot-preroll" class="ad-container">
+                        <script type="text/javascript">
+                            atOptions = {
+                                'key' : 'f7d8a772d00a1a00467953c960dc7205',
+                                'format' : 'iframe',
+                                'height' : 50,
+                                'width' : 320,
+                                'params' : {}
+                            };
+                        </script>
+                        <script type="text/javascript" src="//www.highperformanceformat.com/f7d8a772d00a1a00467953c960dc7205/invoke.js"></script>
+                    </div>
+
+                    <div class="video-wrapper hidden">
+                        <video id="main-movie-player" controls controlsList="nodownload">
+                            <source src="" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="movie-info">
+                        <h3>About the Movie</h3>
+                        <p id="movie-description-player">Description will appear here.</p>
+                        <p><strong>Genre:</strong> <span id="movie-genre-player">N/A</span></p>
+                        <p>
+                            <strong>Likes:</strong> <span id="movie-likes-player">N/A</span>
+                           <button id="playerLikeButton" class="like-button player-like-btn" aria-label="Like this movie">
+                               <span class="like-icon">♡</span> Like
+                           </button>
+                           <button id="playerShareButton" class="share-button player-share-btn hidden" aria-label="Share this movie">
+                               <span class="share-icon">🔗</span> Share
+                           </button>
+                        </p>
+                    </div>
+                </section>
+
+                <section id="adminLoginSection" class="admin-section hidden">
+                    <h2>Admin Login</h2>
+                    <div class="admin-module">
+                        <div class="admin-module-header"><h3><span class="icon-placeholder">🔑</span> Secure Access Panel</h3></div>
+                        <div class="admin-module-content">
+                            <form id="adminLoginForm">
+                                <div><label for="adminUsername">Username:</label><input type="text" id="adminUsername" required autocomplete="username"></div>
+                                <div><label for="adminPassword">Password:</label><input type="password" id="adminPassword" required autocomplete="current-password"></div>
+                                <button type="submit">Login</button>
+                                <p id="adminLoginErrorMsg" class="form-message error hidden">Invalid credentials!</p>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="adminDashboardSection" class="admin-section hidden">
+                    <h2>Admin Dashboard</h2>
+                    <p style="margin-bottom: 20px; color: #ccc;">Welcome, Admin! Manage your movie content and view analytics.</p>
+                    <p id="adminDashboardMessage" class="form-message hidden"></p>
+                    
+                    <div class="admin-module" id="uploadMovieModule">
+                        <div class="admin-module-header"><h3><span class="icon-placeholder">➕</span> Add New Movie</h3></div>
+                        <div class="admin-module-content">
+                            <p id="uploadFormMessage" class="form-message hidden"></p>
+                            <form id="uploadMovieForm">
+                                <div><label for="movieTitleUpload">Movie Title:</label><input type="text" id="movieTitleUpload" required></div>
+                                <div><label for="movieGenreUpload">Genre:</label><input type="text" id="movieGenreUpload" required></div>
+                                
+                                <div>
+                                    <label for="moviePosterUrl">Poster Image URL (Recommended for Hosting):</label>
+                                    <input type="url" id="moviePosterUrl" placeholder="https://example.com/poster.jpg">
+                                    <small class="file-upload-note">For hosted sites, provide the full public URL of the poster image. This ensures it's visible to everyone.</small>
+                                </div>
+                                <div>
+                                    <label for="moviePosterFile">Or Upload Poster Image File (for local/temporary use):</label>
+                                    <input type="file" id="moviePosterFile" accept="image/*">
+                                    <small class="file-upload-note">If no URL is provided above, you can upload an image file. Note: This is temporary and will likely not work for other users on a hosted website.</small>
+                                </div>
+
+                                <div>
+                                    <label for="movieVideoUrlFallback">Video URL (Required for Public Hosting):</label>
+                                    <input type="url" id="movieVideoUrlFallback" placeholder="https://your-cdn.com/path/to/your-movie.mp4">
+                                    <small class="file-upload-note">Enter the full, publicly accessible URL of your MP4 video. This is essential for videos to be viewable when the website is hosted publicly.</small>
+                                </div>
+                                <div>
+                                    <label for="movieVideoFile">Or Upload Video File (MP4, for local/temporary use):</label>
+                                    <input type="file" id="movieVideoFile" accept="video/mp4">
+                                    <small class="file-upload-note">If no URL is provided above, you can upload a local MP4 file. Note: This is temporary and will likely not work for other users on a hosted website.</small>
+                                </div>
+                                
+                                <div><label for="movieDescriptionUpload">Description:</label><textarea id="movieDescriptionUpload" rows="3" required></textarea></div>
+                                <button type="submit">Add Movie to Library</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="admin-module" id="manageMoviesModule">
+                        <div class="admin-module-header"><h3><span class="icon-placeholder">🎬</span> Manage Movies & Statistics</h3></div>
+                        <div class="admin-module-content">
+                            <div style="overflow-x:auto;">
+                                <table class="stats-table" id="statsTable">
+                                    <thead><tr><th>Movie Title</th><th>Views</th><th>Likes</th><th>Actions</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="admin-module" id="analysisModule">
+                        <div class="admin-module-header"><h3><span class="icon-placeholder">📊</span> Content Performance Analysis</h3></div>
+                        <div class="admin-module-content">
+                            <div id="viewsChartContainer">
+                                <canvas id="movieViewsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <button id="adminLogoutBtn">Logout</button>
+                </section>
+            </div> <!-- End of .content-area -->
+
+            <aside class="sidebar-ads">
+                <!-- AD SLOT 2: 160x600 Skyscraper Ad -->
+                <div id="ad-slot-skyscraper" class="ad-container-skyscraper">
+                    <script type="text/javascript">
+                        atOptions = {
+                            'key' : '7ff2feb0d3ad07eea5fb8fb2f532ca84',
+                            'format' : 'iframe',
+                            'height' : 600,
+                            'width' : 160,
+                            'params' : {}
+                        };
+                    </script>
+                    <script type="text/javascript" src="//www.highperformanceformat.com/7ff2feb0d3ad07eea5fb8fb2f532ca84/invoke.js"></script>
+                </div>
+                <!-- You can add more ads or content to the sidebar if needed -->
+            </aside> <!-- End of .sidebar-ads -->
+
+        </div> <!-- End of .main-content-wrapper -->
+    </main>
+
+    <footer>
+        <p>© 2024 CineStream Ultra V2. Simulated for demonstration.</p>
+        <p><a href="#">About</a> | <a href="#">Contact</a> | <a href="#">Privacy</a> | <a href="#">DMCA</a></p>
+    </footer>
+
+    <div id="shareModal" class="share-modal">
+        <div class="share-modal-content">
+            <span class="share-modal-close" id="closeShareModalBtn">×</span>
+            <h4>Share this Movie</h4>
+            <input type="text" id="shareLinkInputModal" readonly value="Movie link will appear here">
+            <div class="share-modal-actions">
+                <button id="copyShareLinkModalBtn">Copy Link</button>
+                <a id="shareFacebookModalBtn" class="social-button facebook" href="#" target="_blank" rel="noopener noreferrer">Facebook</a>
+                <a id="shareTwitterModalBtn" class="social-button twitter" href="#" target="_blank" rel="noopener noreferrer">Twitter</a>
+                <a id="shareWhatsAppModalBtn" class="social-button whatsapp" href="#" data-action="share/whatsapp/share" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            </div>
+            <p id="copyStatusMsg" style="font-size:0.85em; margin-top:10px; color: var(--success-color);" class="hidden"></p>
+        </div>
+    </div>
+
+    <!-- AD SCRIPTS 3 & 4: profitableratecpm.com scripts -->
+    <script type='text/javascript' src='//pl26800849.profitableratecpm.com/07/ad/54/07ad546033524ef85683d26050720d0b.js'></script>
+    <script type='text/javascript' src='//pl26800861.profitableratecpm.com/ea/de/41/eade412d905bf1a92d94cd6c0a487613.js'></script> 
+
+    <script>
+    // === DOM Elements ===
+    const adPreroll = document.getElementById('ad-slot-preroll');
+    const videoWrapper = document.querySelector('.video-wrapper');
+    const mainMoviePlayer = document.getElementById('main-movie-player');
+    const playingMovieTitleElement = document.getElementById('playing-movie-title');
+    const movieDescriptionPlayer = document.getElementById('movie-description-player');
+    const movieGenrePlayer = document.getElementById('movie-genre-player');
+    const movieLikesPlayer = document.getElementById('movie-likes-player');
+    const playerLikeButton = document.getElementById('playerLikeButton');
+    const playerShareButton = document.getElementById('playerShareButton'); 
+
+    const movieGridContainer = document.getElementById('movieGridContainer');
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const adminLoginSection = document.getElementById('adminLoginSection');
+    const adminLoginForm = document.getElementById('adminLoginForm');
+    const adminLoginErrorMsg = document.getElementById('adminLoginErrorMsg');
+    const adminDashboardSection = document.getElementById('adminDashboardSection');
+    const adminDashboardMessage = document.getElementById('adminDashboardMessage');
+    const uploadMovieForm = document.getElementById('uploadMovieForm');
+    const uploadFormMessage = document.getElementById('uploadFormMessage');
+    const statsTableBody = document.querySelector('#statsTable tbody');
+    const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+    const movieViewsChartCanvas = document.getElementById('movieViewsChart');
+
+    const menuToggleBtn = document.getElementById('menuToggleBtn');
+    const mainNav = document.getElementById('mainNav');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    // Share Modal Elements
+    const shareModal = document.getElementById('shareModal');
+    const closeShareModalBtn = document.getElementById('closeShareModalBtn');
+    const shareLinkInputModal = document.getElementById('shareLinkInputModal');
+    const copyShareLinkModalBtn = document.getElementById('copyShareLinkModalBtn');
+    const shareFacebookModalBtn = document.getElementById('shareFacebookModalBtn');
+    const shareTwitterModalBtn = document.getElementById('shareTwitterModalBtn');
+    const shareWhatsAppModalBtn = document.getElementById('shareWhatsAppModalBtn');
+    const copyStatusMsg = document.getElementById('copyStatusMsg');
+
+
+    // === State & Data ===
+    let adTimer;
+    let moviesData = []; 
+    let movieViewsChartInstance = null;
+    let currentMoviePlayingId = null; 
+    let likedMoviesStorageKey = 'cineStreamUltraLikedMovies';
+
+
+    // === Functions ===
+    function displayFormMessage(message, type, targetElement = uploadFormMessage) {
+        targetElement.textContent = message;
+        targetElement.className = `form-message ${type}`;
+        targetElement.classList.remove('hidden');
+        setTimeout(() => targetElement.classList.add('hidden'), 7000); 
+    }
+
+    function displayAdminDashboardMessage(message, type) {
+        displayFormMessage(message, type, adminDashboardMessage);
+    }
+
+    function getLikedMovies() {
+        const liked = localStorage.getItem(likedMoviesStorageKey);
+        return liked ? JSON.parse(liked) : [];
+    }
+
+    function hasUserLiked(movieId) {
+        return getLikedMovies().includes(movieId);
+    }
+
+    function setUserLiked(movieId) {
+        const likedMovies = getLikedMovies();
+        if (!likedMovies.includes(movieId)) {
+            likedMovies.push(movieId);
+            localStorage.setItem(likedMoviesStorageKey, JSON.stringify(likedMovies));
+            return true;
+        }
+        return false;
+    }
+
+    function handleLikeClick(movieId) {
+        const movie = getMovieById(movieId);
+        if (!movie) return;
+
+        if (!hasUserLiked(movieId)) {
+            if (setUserLiked(movieId)) { 
+                movie.likes = (movie.likes || 0) + 1;
+                
+                const cardElement = movieGridContainer.querySelector(`.movie-card[data-movie-id="${movieId}"]`);
+                if (cardElement) {
+                    const likeButtonOnCard = cardElement.querySelector('.like-button');
+                    const likeCountSpanOnCard = cardElement.querySelector('.like-count');
+                    const likeIconOnCard = cardElement.querySelector('.like-icon');
+                    if (likeButtonOnCard) likeButtonOnCard.classList.add('liked');
+                    if (likeIconOnCard) likeIconOnCard.textContent = '♥'; 
+                    if (likeCountSpanOnCard) likeCountSpanOnCard.textContent = movie.likes;
+                }
+
+                if (currentMoviePlayingId === movieId) {
+                    playerLikeButton.classList.add('liked');
+                    playerLikeButton.querySelector('.like-icon').textContent = '♥';
+                    movieLikesPlayer.textContent = movie.likes;
+                }
+
+                if (isAdminLoggedIn()) {
+                    updateStatsAndAnalysis();
+                }
+            }
+        }
+    }
+
+    // --- Share Functionality ---
+    async function handleShareClick(movieId) {
+        const movie = getMovieById(movieId);
+        if (!movie) {
+            console.error("Cannot share: Movie not found.");
+            return;
+        }
+
+        const basePageUrl = window.location.origin + window.location.pathname;
+        const shareUrl = `${basePageUrl}#player-section?movie=${movie.id}`; 
+        const shareTitle = movie.title;
+        const shareText = `Check out this movie: ${movie.title} - ${movie.description.substring(0, 100)}...`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: shareTitle,
+                    text: shareText,
+                    url: shareUrl,
+                });
+                console.log('Movie shared successfully!');
+            } catch (error) {
+                console.error('Error sharing movie:', error);
+                if (error.name !== 'AbortError') { 
+                    displayShareModal(shareTitle, shareUrl, shareText);
+                }
+            }
+        } else { 
+            displayShareModal(shareTitle, shareUrl, shareText);
+        }
+    }
+
+    function displayShareModal(title, url, text) {
+        shareLinkInputModal.value = url;
+        shareModal.classList.add('active'); 
+
+        const encodedUrl = encodeURIComponent(url);
+        const encodedTitle = encodeURIComponent(title);
+
+        shareFacebookModalBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        shareTwitterModalBtn.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+        shareWhatsAppModalBtn.href = `https://api.whatsapp.com/send?text=${encodedTitle}%20${encodedUrl}`;
+
+        copyStatusMsg.classList.add('hidden');
+    }
+
+    closeShareModalBtn.onclick = function() {
+        shareModal.classList.remove('active');
+    }
+    window.onclick = function(event) {
+        if (event.target == shareModal) {
+            shareModal.classList.remove('active');
+        }
+    }
+
+    copyShareLinkModalBtn.onclick = function() {
+        shareLinkInputModal.select();
+        shareLinkInputModal.setSelectionRange(0, 99999); 
+
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                copyStatusMsg.textContent = 'Link copied to clipboard!';
+                copyStatusMsg.style.color = 'var(--success-color)';
+                copyStatusMsg.classList.remove('hidden');
+                setTimeout(() => copyStatusMsg.classList.add('hidden'), 2500);
+            } else {
+                throw new Error('Copy command failed');
+            }
+        } catch (err) {
+             copyStatusMsg.textContent = 'Failed to copy. Please copy manually.';
+             copyStatusMsg.style.color = 'var(--error-color)';
+             copyStatusMsg.classList.remove('hidden');
+             setTimeout(() => {
+                copyStatusMsg.classList.add('hidden');
+            }, 3000);
+        }
+        window.getSelection().removeAllRanges();
+    }
+
+
+    function renderMovieCards(moviesToRender = moviesData) {
+        movieGridContainer.innerHTML = '';
+        if (moviesToRender.length === 0) {
+            if (moviesData.length === 0) {
+                 movieGridContainer.innerHTML = `<p class="no-results-message">No movies uploaded yet. Please log in as admin to add movies.</p>`;
+            } else { 
+                 movieGridContainer.innerHTML = `<p class="no-results-message">😕 No movies found matching your criteria.</p>`;
+            }
+            return;
+        }
+
+        moviesToRender.forEach(movie => {
+            const card = document.createElement('div');
+            card.classList.add('movie-card');
+            card.setAttribute('role', 'button');
+            card.setAttribute('tabindex', '0');
+            card.dataset.movieId = movie.id;
+
+            card.onclick = (event) => {
+                if (event.target.closest('.like-button')) return; 
+                loadMovie(movie.id);
+            };
+            card.onkeydown = (e) => { 
+                if (e.target.closest('.like-button')) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault(); 
+                        handleLikeClick(movie.id);
+                    }
+                    return;
+                }
+                if (e.key === 'Enter' || e.key === ' ') loadMovie(movie.id); 
+            };
+            
+            const isLiked = hasUserLiked(movie.id);
+            const likeIconChar = isLiked ? '♥' : '♡';
+
+            card.innerHTML = `
+                <img src="${movie.posterSrc}" alt="${movie.title}" loading="lazy" onerror="this.onerror=null;this.src='https://via.placeholder.com/190x300.png?text=Poster+Error';">
+                <div class="movie-card-content">
+                    <div>
+                        <h3>${movie.title}</h3>
+                        <p>Genre: ${movie.genre}</p>
+                    </div>
+                    <div class="movie-card-actions">
+                        <span class="play-button">► Watch Now</span>
+                        <button class="like-button ${isLiked ? 'liked' : ''}" aria-label="Like ${movie.title}" title="Like ${movie.title}">
+                            <span class="like-icon">${likeIconChar}</span> <span class="like-count">${movie.likes || 0}</span>
+                        </button>
+                    </div>
+                </div>`;
+            
+            const likeButtonOnCard = card.querySelector('.like-button');
+            likeButtonOnCard.addEventListener('click', (e) => {
+                e.stopPropagation(); 
+                handleLikeClick(movie.id);
+            });
+            
+            movieGridContainer.appendChild(card);
+        });
+    }
+
+
+    function getMovieById(id) {
+        return moviesData.find(m => m.id === id);
+    }
+    
+    function loadMovie(movieId) {
+        const movie = getMovieById(movieId);
+        if (!movie) { console.error("Movie not found!"); return; }
+        
+        currentMoviePlayingId = movieId; 
+
+        if (adTimer) clearTimeout(adTimer);
+
+        videoWrapper.classList.add('hidden');
+        mainMoviePlayer.pause();
+        mainMoviePlayer.currentTime = 0;
+        if (mainMoviePlayer.querySelector('source')) {
+            mainMoviePlayer.querySelector('source').src = "";
+        }
+
+
+        adPreroll.classList.remove('hidden'); 
+        playingMovieTitleElement.textContent = `Loading: ${movie.title}`;
+        movieDescriptionPlayer.textContent = `Fetching details...`;
+        movieGenrePlayer.textContent = movie.genre;
+        movieLikesPlayer.textContent = movie.likes || 0;
+
+        const isLiked = hasUserLiked(movieId);
+        playerLikeButton.classList.toggle('liked', isLiked);
+        playerLikeButton.querySelector('.like-icon').textContent = isLiked ? '♥' : '♡';
+        playerLikeButton.onclick = () => handleLikeClick(movieId); 
+
+        playerShareButton.onclick = () => handleShareClick(movieId);
+        playerShareButton.classList.remove('hidden');
+
+
+        if (document.getElementById('player-section').classList.contains('hidden')) {
+            document.getElementById('player-section').classList.remove('hidden');
+        }
+        if (document.getElementById('movies').classList.contains('hidden')) {
+            document.getElementById('movies').classList.remove('hidden');
+        }
+
+
+        adTimer = setTimeout(() => {
+            adPreroll.classList.add('hidden'); // Hide the preroll ad container after 1.5s
+            videoWrapper.classList.remove('hidden');
+            
+            if (mainMoviePlayer.querySelector('source')) {
+                 mainMoviePlayer.querySelector('source').src = movie.videoSrc;
+            } else { 
+                const sourceEl = document.createElement('source');
+                sourceEl.src = movie.videoSrc;
+                sourceEl.type = "video/mp4";
+                mainMoviePlayer.appendChild(sourceEl);
+            }
+            mainMoviePlayer.load();
+            mainMoviePlayer.play().catch(error => console.warn("Autoplay prevented:", error));
+            
+            playingMovieTitleElement.textContent = `Now Playing: ${movie.title}`;
+            movieDescriptionPlayer.textContent = movie.description;
+            
+            document.getElementById('player-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            movie.views = (movie.views || 0) + 1;
+            if(isAdminLoggedIn()) {
+                updateStatsAndAnalysis(); 
+            }
+        }, 1500); 
+    }
+
+    // --- Admin Functions ---
+    function isAdminLoggedIn() {
+        return !adminDashboardSection.classList.contains('hidden');
+    }
+
+    function deleteMovie(movieId) {
+        const movieToDelete = moviesData.find(m => m.id === movieId);
+        if (!movieToDelete) {
+            displayAdminDashboardMessage('Error: Movie not found for deletion.', 'error');
+            return;
+        }
+
+        if (confirm(`Are you sure you want to delete "${movieToDelete.title}"? This action cannot be undone.`)) {
+            if (movieToDelete.videoSrc && movieToDelete.videoSrc.startsWith('blob:')) {
+                URL.revokeObjectURL(movieToDelete.videoSrc);
+            }
+            if (movieToDelete.posterSrc && movieToDelete.posterSrc.startsWith('blob:')) {
+                URL.revokeObjectURL(movieToDelete.posterSrc);
+            }
+
+            moviesData = moviesData.filter(movie => movie.id !== movieId);
+            renderMovieCards(filterMovies(searchInput.value)); 
+            updateStatsAndAnalysis(); 
+            displayAdminDashboardMessage(`Movie "${movieToDelete.title}" deleted successfully.`, 'success');
+
+            if (currentMoviePlayingId === movieId) {
+                playingMovieTitleElement.textContent = "Select a movie to play";
+                movieDescriptionPlayer.textContent = "Description will appear here.";
+                movieGenrePlayer.textContent = "N/A";
+                movieLikesPlayer.textContent = "N/A";
+                playerLikeButton.classList.remove('liked');
+                playerLikeButton.querySelector('.like-icon').textContent = '♡';
+                playerLikeButton.onclick = null;
+                playerShareButton.classList.add('hidden'); 
+                playerShareButton.onclick = null;
+                videoWrapper.classList.add('hidden');
+                mainMoviePlayer.pause();
+                if(mainMoviePlayer.querySelector('source')) mainMoviePlayer.querySelector('source').src = "";
+                currentMoviePlayingId = null;
+            }
+        }
+    }
+
+    function updateStatsTable() {
+        statsTableBody.innerHTML = '';
+        if (moviesData.length === 0) {
+            const row = statsTableBody.insertRow();
+            const cell = row.insertCell();
+            cell.colSpan = 4;
+            cell.textContent = "No movies available to manage.";
+            cell.style.textAlign = "center";
+            cell.style.padding = "20px";
+            return;
+        }
+        const sortedMoviesForTable = [...moviesData].sort((a, b) => a.title.localeCompare(b.title));
+
+        sortedMoviesForTable.forEach(movie => {
+            const row = statsTableBody.insertRow();
+            row.insertCell().textContent = movie.title;
+            row.insertCell().textContent = movie.views || 0;
+            row.insertCell().textContent = movie.likes || 0;
+            
+            const actionsCell = row.insertCell();
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('delete-btn');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.onclick = () => deleteMovie(movie.id);
+            actionsCell.appendChild(deleteBtn);
+        });
+    }
+
+    function renderMovieViewsChart() {
+        if (movieViewsChartInstance) {
+            movieViewsChartInstance.destroy();
+        }
+        const ctx = movieViewsChartCanvas.getContext('2d');
+        
+        if (moviesData.length === 0) { 
+            ctx.clearRect(0, 0, movieViewsChartCanvas.width, movieViewsChartCanvas.height);
+            ctx.font = "16px var(--font-main)";
+            ctx.fillStyle = "#aaa";
+            ctx.textAlign = "center";
+            ctx.fillText("No movie data to display in chart.", movieViewsChartCanvas.width / 2, movieViewsChartCanvas.height / 2);
+            return;
+        }
+
+        const sortedMoviesForChart = [...moviesData].sort((a, b) => (b.views || 0) - (a.views || 0));
+
+        const movieTitles = sortedMoviesForChart.map(m => m.title.length > 15 ? m.title.substring(0,12)+'...' : m.title); 
+        const movieViewCounts = sortedMoviesForChart.map(m => m.views || 0);
+
+        movieViewsChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: movieTitles,
+                datasets: [{
+                    label: 'Total Views',
+                    data: movieViewCounts,
+                    backgroundColor: sortedMoviesForChart.map((_, index) => `hsla(${(index * 50 + 10) % 360}, 65%, 55%, 0.8)`), 
+                    borderColor: sortedMoviesForChart.map((_, index) => `hsla(${(index * 50 + 10) % 360}, 65%, 45%, 1)`),
+                    borderWidth: 1.5,
+                    borderRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false, 
+                scales: {
+                    y: {
+                        beginAtZero: true, 
+                        ticks: { color: '#bbb', precision: 0, font: { family: 'Inter' } },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    x: {
+                        ticks: { color: '#bbb', font: { family: 'Inter' } },
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: true, labels: { color: '#ddd', boxWidth: 15, padding: 15, font: { family: 'Inter', size: 13 } } }
+                }
+            }
+        });
+    }
+    
+    function updateStatsAndAnalysis() {
+        updateStatsTable();
+        renderMovieViewsChart();
+    }
+
+    adminLoginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveSection(adminLoginSection);
+        if (mainNav.classList.contains('active')) {
+            mainNav.classList.remove('active');
+            menuToggleBtn.setAttribute('aria-expanded', 'false');
+            menuToggleBtn.textContent = '☰';
+        }
+    });
+
+    adminLoginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = document.getElementById('adminUsername').value;
+        const password = document.getElementById('adminPassword').value;
+        if (username === 'admin' && password === 'password123') {
+            setActiveSection(adminDashboardSection);
+            adminLoginErrorMsg.classList.add('hidden');
+            adminDashboardMessage.classList.add('hidden');
+            updateStatsAndAnalysis();
+        } else {
+            displayFormMessage('Invalid credentials!', 'error', adminLoginErrorMsg);
+        }
+    });
+
+    adminLogoutBtn.addEventListener('click', () => {
+        setActiveSection(document.getElementById('movies')); 
+        document.getElementById('adminUsername').value = '';
+        document.getElementById('adminPassword').value = '';
+        adminDashboardMessage.classList.add('hidden');
+        navLinks.forEach(l => l.classList.remove('active'));
+        document.querySelector('header nav ul li a[href="#home"]').classList.add('active');
+    });
+
+    uploadMovieForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = document.getElementById('movieTitleUpload').value.trim();
+        const genre = document.getElementById('movieGenreUpload').value.trim();
+        const description = document.getElementById('movieDescriptionUpload').value.trim();
+
+        const posterUrl = document.getElementById('moviePosterUrl').value.trim();
+        const posterFile = document.getElementById('moviePosterFile').files[0];
+        
+        const videoUrl = document.getElementById('movieVideoUrlFallback').value.trim();
+        const videoFile = document.getElementById('movieVideoFile').files[0];
+
+        if (!title || !genre || !description) {
+            displayFormMessage('Please fill in Movie Title, Genre, and Description.', 'error');
+            return;
+        }
+
+        let actualPosterSrc;
+        let posterIsFromUrl = false;
+        if (posterUrl) {
+            actualPosterSrc = posterUrl;
+            posterIsFromUrl = true;
+        } else if (posterFile) {
+            actualPosterSrc = URL.createObjectURL(posterFile);
+        } else {
+            displayFormMessage('Please provide a Poster URL or upload a Poster Image File.', 'error');
+            return;
+        }
+
+        let actualVideoSrc;
+        let videoIsFromUrl = false;
+        if (videoUrl) {
+            actualVideoSrc = videoUrl;
+            videoIsFromUrl = true;
+        } else if (videoFile) {
+            actualVideoSrc = URL.createObjectURL(videoFile);
+        } else {
+            displayFormMessage('Please provide a Video URL or upload a Video File.', 'error');
+            return;
+        }
+        
+        const newMovie = {
+            id: `m${Date.now()}`,
+            title, 
+            genre, 
+            posterSrc: actualPosterSrc, 
+            videoSrc: actualVideoSrc,
+            description,
+            views: 0, 
+            likes: 0
+        };
+        moviesData.push(newMovie);
+        renderMovieCards(filterMovies(searchInput.value)); 
+        updateStatsAndAnalysis(); 
+        
+        let successMessage = `Movie '${title}' added successfully.`;
+        if (!posterIsFromUrl || !videoIsFromUrl) {
+            let temporaryParts = [];
+            if (!posterIsFromUrl && posterFile) temporaryParts.push("poster image");
+            if (!videoIsFromUrl && videoFile) temporaryParts.push("video");
+            
+            if (temporaryParts.length > 0) {
+                successMessage += ` IMPORTANT: The ${temporaryParts.join(' and ')} from uploaded file(s) are temporary and will likely NOT work for others when hosted. For public hosting, always use direct URLs.`;
+            }
+        }
+        displayFormMessage(successMessage, 'success');
+        uploadMovieForm.reset();
+    });
+
+
+    function filterMovies(searchTerm) {
+        const lowerSearchTerm = searchTerm.toLowerCase().trim();
+        if (!lowerSearchTerm) {
+            return moviesData;
+        }
+        return moviesData.filter(movie => 
+            movie.title.toLowerCase().includes(lowerSearchTerm)
+        );
+    }
+
+    searchForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const searchTerm = searchInput.value;
+        const filtered = filterMovies(searchTerm);
+        renderMovieCards(filtered);
+    });
+
+    searchInput.addEventListener('input', () => { 
+        if (searchInput.value.trim() === "") { 
+            renderMovieCards(moviesData);
+        }
+    });
+     searchInput.addEventListener('search', () => { 
+        if (searchInput.value.trim() === "") {
+            renderMovieCards(moviesData);
+        }
+    });
+
+
+    function setActiveSection(targetSectionIdOrElement) {
+        // Hide all main sections within .content-area and also top-level admin sections if not in .content-area
+        document.querySelectorAll('.content-area > section, main > section.admin-section').forEach(s => s.classList.add('hidden'));
+        
+        let targetSection;
+        if (typeof targetSectionIdOrElement === 'string') {
+            targetSection = document.getElementById(targetSectionIdOrElement);
+        } else {
+            targetSection = targetSectionIdOrElement;
+        }
+
+        if (targetSection) {
+            targetSection.classList.remove('hidden');
+            
+            // Special handling for admin sections to ensure main movie/player are hidden
+            if (targetSection.id === 'adminLoginSection' || targetSection.id === 'adminDashboardSection') {
+                document.getElementById('movies').classList.add('hidden');
+                // Keep player visible if it's already playing, otherwise hide it
+                if (videoWrapper.classList.contains('hidden')) { 
+                     document.getElementById('player-section').classList.add('hidden');
+                } else {
+                     document.getElementById('player-section').classList.remove('hidden');
+                }
+            } else { // For non-admin sections, ensure movie list and player section are potentially visible
+                 document.getElementById('movies').classList.remove('hidden');
+                 document.getElementById('player-section').classList.remove('hidden');
+
+                 // If navigating to home, ensure player section is visible but video might be reset
+                 if(targetSection.id === 'movies' && !currentMoviePlayingId) {
+                    // If no movie is playing, ensure player shows placeholder
+                 }
+            }
+             // Scroll to target section
+            const rect = targetSection.getBoundingClientRect();
+             if (rect.top < parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height-desktop')) || rect.bottom > window.innerHeight) {
+                  targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+             }
+        }
+    }
+    
+    menuToggleBtn.addEventListener('click', () => {
+        const isExpanded = mainNav.classList.toggle('active');
+        menuToggleBtn.setAttribute('aria-expanded', isExpanded);
+        menuToggleBtn.textContent = isExpanded ? '✕' : '☰';
+    });
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (this.id === 'adminLoginBtn') { 
+                 e.preventDefault();
+                 setActiveSection('adminLoginSection');
+            } else {
+                const targetHref = this.getAttribute('href');
+                if (targetHref && targetHref.startsWith('#')) {
+                    e.preventDefault();
+                    const targetId = targetHref.substring(1);
+                    let targetSectionId = targetId;
+
+                    if (targetId === 'home') {
+                        targetSectionId = 'movies'; 
+                    }
+                    setActiveSection(targetSectionId);
+                }
+            }
+            navLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+
+            if (mainNav.classList.contains('active')) {
+                mainNav.classList.remove('active');
+                menuToggleBtn.setAttribute('aria-expanded', 'false');
+                menuToggleBtn.textContent = '☰';
+            }
+        });
+    });
+
+    function handleDeepLink() {
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#player-section?movie=')) {
+            const movieId = hash.split('=')[1];
+            if (movieId) {
+                setTimeout(() => { 
+                    const movie = getMovieById(movieId);
+                    if (movie) {
+                        setActiveSection('player-section'); 
+                        loadMovie(movieId); 
+                    } else {
+                        console.warn("Deep link movie ID not found:", movieId);
+                        setActiveSection('movies'); 
+                    }
+                }, 100); 
+            }
+        } else if (hash === "#home" || hash === "#movies" || hash === "") {
+             setActiveSection('movies');
+        } else if (hash === "#player-section") {
+             setActiveSection('player-section');
+        } else if (hash === "#adminLoginSection" || hash === "#adminDashboardSection") {
+            setActiveSection(hash.substring(1));
+        } else if (hash) { // Handle other direct hash links like #adminLoginBtn (though usually handled by nav click)
+            const targetElement = document.getElementById(hash.substring(1));
+            if (targetElement && (targetElement.classList.contains('admin-section') || targetElement.classList.contains('movie-listing-section') || targetElement.classList.contains('movie-player-section'))) {
+                setActiveSection(targetElement);
+            } else {
+                 setActiveSection('movies'); // Default fallback
+            }
+        } else {
+            setActiveSection('movies'); // Default view
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        renderMovieCards(); 
+        updateStatsAndAnalysis(); 
+        
+        const homeLink = document.querySelector('header nav ul li a[href="#home"]');
+        if (homeLink) homeLink.classList.add('active');
+
+        if (!mainMoviePlayer.querySelector('source') || mainMoviePlayer.querySelector('source').src === "") {
+            playingMovieTitleElement.textContent = "Select a movie to play";
+            movieDescriptionPlayer.textContent = "Description will appear here.";
+            movieGenrePlayer.textContent = "N/A";
+            movieLikesPlayer.textContent = "N/A";
+            playerLikeButton.classList.remove('liked');
+            playerLikeButton.querySelector('.like-icon').textContent = '♡';
+            playerLikeButton.onclick = null; 
+            playerShareButton.classList.add('hidden'); 
+            playerShareButton.onclick = null;
+        }
+
+        handleDeepLink(); 
+        window.addEventListener('hashchange', handleDeepLink, false);
+    });
+    </script>
+</body>
+</html>
