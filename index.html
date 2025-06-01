@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0,  minimum-scale=1.0">
-    <title>CineStream Ultra V2 - Full Feature Demo</title>
+    <title>CineStream Ultra V2 - Persistent Demo (LocalStorage)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -326,8 +326,10 @@
             background-color: black; margin-bottom: 20px; position: relative;
             padding-top: 56.25%; border-radius: 8px; overflow: hidden;
         }
-        .video-wrapper video {
+        .video-wrapper video,
+        .video-wrapper iframe { /* Apply to both video and iframe */
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            border: none; /* Ensure iframe has no border by default */
         }
         .movie-info h3 { margin-top: 0; font-size: clamp(1.4em, 3.5vw, 1.8em); font-weight: 700; margin-bottom: 8px; }
         .movie-info p { color: #ccc; font-size: clamp(0.9em, 2.3vw, 1em); margin-bottom: 8px; }
@@ -408,6 +410,13 @@
             display: block; margin-top: -12px; margin-bottom: 15px;
             color: #aaa; font-size: 0.85em; font-style: italic;
             line-height: 1.4;
+        }
+        .important-warning {
+            background-color: rgba(244, 67, 54, 0.2) !important;
+            color: #ff9a9a !important;
+            border-left-color: var(--error-color) !important;
+            font-weight: bold;
+            white-space: pre-line; /* To respect newlines in the message */
         }
 
 
@@ -600,8 +609,7 @@
                 height: auto; /* Adjust height */
             }
             .ad-container-skyscraper {
-                /* You might want to center it or make it responsive here */
-                margin: 0 auto 20px auto; /* Center it if it's narrower than full width */
+                margin: 0 auto 20px auto; 
             }
         }
 
@@ -727,7 +735,6 @@
                 <section id="player-section" class="movie-player-section">
                     <h2 class="section-title" id="playing-movie-title">Select a movie to play</h2>
                     
-                    <!-- AD SLOT 1: 320x50 Banner (Original Ad) -->
                     <div id="ad-slot-preroll" class="ad-container">
                         <script type="text/javascript">
                             atOptions = {
@@ -742,10 +749,16 @@
                     </div>
 
                     <div class="video-wrapper hidden">
-                        <video id="main-movie-player" controls controlsList="nodownload">
+                        <video id="main-movie-player" class="hidden" controls controlsList="nodownload">
                             <source src="" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
+                        <iframe id="youtube-player-iframe" class="hidden"
+                            src=""
+                            title="YouTube video player"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen></iframe>
                     </div>
                     <div class="movie-info">
                         <h3>About the Movie</h3>
@@ -792,25 +805,25 @@
                                 <div><label for="movieGenreUpload">Genre:</label><input type="text" id="movieGenreUpload" required></div>
                                 
                                 <div>
-                                    <label for="moviePosterUrl">Poster Image URL (Recommended for Hosting):</label>
-                                    <input type="url" id="moviePosterUrl" placeholder="https://example.com/poster.jpg">
-                                    <small class="file-upload-note">For hosted sites, provide the full public URL of the poster image. This ensures it's visible to everyone.</small>
+                                    <label for="moviePosterUrl">Permanent Poster Link (e.g., https://.../poster.jpg or Google Drive share link):</label>
+                                    <input type="url" id="moviePosterUrl" placeholder="https://example.com/poster.jpg OR Google Drive Link">
+                                    <small class="file-upload-note">Provide a direct public URL to an image (e.g., .jpg, .png) OR a shareable Google Drive link for the poster. If using Google Drive, ensure the file is shared publicly ("Anyone with the link").</small>
                                 </div>
                                 <div>
-                                    <label for="moviePosterFile">Or Upload Poster Image File (for local/temporary use):</label>
+                                    <label for="moviePosterFile">Temporary Poster Upload (For Local Preview - Disappears on Refresh/Close):</label>
                                     <input type="file" id="moviePosterFile" accept="image/*">
-                                    <small class="file-upload-note">If no URL is provided above, you can upload an image file. Note: This is temporary and will likely not work for other users on a hosted website.</small>
+                                    <small class="file-upload-note">Use this to upload a poster from your computer for temporary viewing. It will NOT be saved permanently on a hosted website and will disappear if you leave/reload the page.</small>
                                 </div>
 
                                 <div>
-                                    <label for="movieVideoUrlFallback">Video URL (Required for Public Hosting):</label>
-                                    <input type="url" id="movieVideoUrlFallback" placeholder="https://your-cdn.com/path/to/your-movie.mp4">
-                                    <small class="file-upload-note">Enter the full, publicly accessible URL of your MP4 video. This is essential for videos to be viewable when the website is hosted publicly.</small>
+                                    <label for="movieVideoUrlFallback">Permanent Video Link (MP4 URL, Google Drive, or YouTube Link):</label>
+                                    <input type="url" id="movieVideoUrlFallback" placeholder="Direct MP4, Google Drive, or YouTube watch/short link">
+                                    <small class="file-upload-note">Enter a direct public URL to MP4, a shareable Google Drive link (ensure public sharing), or a standard YouTube video link (e.g., youtube.com/watch?v=...). Note: Large GDrive videos might have playback issues. YouTube autoplay might be restricted by browsers.</small>
                                 </div>
                                 <div>
-                                    <label for="movieVideoFile">Or Upload Video File (MP4, for local/temporary use):</label>
+                                    <label for="movieVideoFile">Temporary Video Upload (For Local Preview - Disappears on Refresh/Close):</label>
                                     <input type="file" id="movieVideoFile" accept="video/mp4">
-                                    <small class="file-upload-note">If no URL is provided above, you can upload a local MP4 file. Note: This is temporary and will likely not work for other users on a hosted website.</small>
+                                    <small class="file-upload-note">Use this to upload a video from your computer for temporary viewing. It will NOT be saved permanently on a hosted website and will disappear if you leave/reload the page.</small>
                                 </div>
                                 
                                 <div><label for="movieDescriptionUpload">Description:</label><textarea id="movieDescriptionUpload" rows="3" required></textarea></div>
@@ -841,10 +854,9 @@
                     </div>
                     <button id="adminLogoutBtn">Logout</button>
                 </section>
-            </div> <!-- End of .content-area -->
+            </div> 
 
             <aside class="sidebar-ads">
-                <!-- AD SLOT 2: 160x600 Skyscraper Ad -->
                 <div id="ad-slot-skyscraper" class="ad-container-skyscraper">
                     <script type="text/javascript">
                         atOptions = {
@@ -857,10 +869,9 @@
                     </script>
                     <script type="text/javascript" src="//www.highperformanceformat.com/7ff2feb0d3ad07eea5fb8fb2f532ca84/invoke.js"></script>
                 </div>
-                <!-- You can add more ads or content to the sidebar if needed -->
-            </aside> <!-- End of .sidebar-ads -->
+            </aside> 
 
-        </div> <!-- End of .main-content-wrapper -->
+        </div> 
     </main>
 
     <footer>
@@ -883,7 +894,6 @@
         </div>
     </div>
 
-    <!-- AD SCRIPTS 3 & 4: profitableratecpm.com scripts -->
     <script type='text/javascript' src='//pl26800849.profitableratecpm.com/07/ad/54/07ad546033524ef85683d26050720d0b.js'></script>
     <script type='text/javascript' src='//pl26800861.profitableratecpm.com/ea/de/41/eade412d905bf1a92d94cd6c0a487613.js'></script> 
 
@@ -892,6 +902,7 @@
     const adPreroll = document.getElementById('ad-slot-preroll');
     const videoWrapper = document.querySelector('.video-wrapper');
     const mainMoviePlayer = document.getElementById('main-movie-player');
+    const youtubePlayerIframe = document.getElementById('youtube-player-iframe'); // Added
     const playingMovieTitleElement = document.getElementById('playing-movie-title');
     const movieDescriptionPlayer = document.getElementById('movie-description-player');
     const movieGenrePlayer = document.getElementById('movie-genre-player');
@@ -936,14 +947,92 @@
     let movieViewsChartInstance = null;
     let currentMoviePlayingId = null; 
     let likedMoviesStorageKey = 'cineStreamUltraLikedMovies';
+    const moviesStorageKey = 'cineStreamUltraMoviesData'; // Key for LocalStorage
+
+    // === Google Drive & YouTube Helper Functions ===
+    function getGoogleDriveFileId(url) {
+        let fileId = null;
+        const regexes = [
+            /file\/d\/([a-zA-Z0-9_-]+)/,      
+            /open\?id=([a-zA-Z0-9_-]+)/,      
+            /uc\?id=([a-zA-Z0-9_-]+)/,        
+            /thumbnail\?id=([a-zA-Z0-9_-]+)/  
+        ];
+        for (const regex of regexes) {
+            const match = url.match(regex);
+            if (match && match[1]) {
+                fileId = match[1];
+                break;
+            }
+        }
+        return fileId;
+    }
+
+    function convertToGoogleDriveEmbedVideoUrl(driveUrl) {
+        const fileId = getGoogleDriveFileId(driveUrl);
+        if (fileId) {
+            return `https://drive.google.com/uc?export=download&id=${fileId}`;
+        }
+        return null; 
+    }
+
+    function convertToGoogleDriveThumbnailUrl(driveUrl) {
+        const fileId = getGoogleDriveFileId(driveUrl);
+        if (fileId) {
+            return `https://drive.google.com/uc?export=view&id=${fileId}`;
+        }
+        return null;
+    }
+
+    function getYouTubeVideoId(url) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    }
 
 
     // === Functions ===
+
+    function saveMoviesToLocalStorage() {
+        try {
+            const moviesToSave = moviesData.map(movie => ({ ...movie }));
+            localStorage.setItem(moviesStorageKey, JSON.stringify(moviesToSave));
+        } catch (e) {
+            console.error("Error saving movies to localStorage:", e);
+        }
+    }
+
+    function loadMoviesFromLocalStorage() {
+        try {
+            const storedMovies = localStorage.getItem(moviesStorageKey);
+            if (storedMovies) {
+                moviesData = JSON.parse(storedMovies);
+                moviesData.forEach(movie => {
+                    if (movie.posterSrc && movie.posterSrc.startsWith('blob:') && movie._originalPosterFile) {
+                        // console.warn(`Poster for "${movie.title}" was a temporary blob and may not load.`);
+                    }
+                    if (movie.videoSrc && movie.videoSrc.startsWith('blob:') && movie._originalVideoFile) {
+                        // console.warn(`Video for "${movie.title}" was a temporary blob and may not load.`);
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Error loading movies from localStorage:", e);
+            moviesData = []; 
+        }
+    }
+
+
     function displayFormMessage(message, type, targetElement = uploadFormMessage) {
         targetElement.textContent = message;
         targetElement.className = `form-message ${type}`;
+        if (message.includes("IMPORTANT WARNING")) { 
+             targetElement.classList.add('important-warning');
+        } else {
+            targetElement.classList.remove('important-warning');
+        }
         targetElement.classList.remove('hidden');
-        setTimeout(() => targetElement.classList.add('hidden'), 7000); 
+        setTimeout(() => targetElement.classList.add('hidden'), 15000); 
     }
 
     function displayAdminDashboardMessage(message, type) {
@@ -976,6 +1065,7 @@
         if (!hasUserLiked(movieId)) {
             if (setUserLiked(movieId)) { 
                 movie.likes = (movie.likes || 0) + 1;
+                saveMoviesToLocalStorage(); 
                 
                 const cardElement = movieGridContainer.querySelector(`.movie-card[data-movie-id="${movieId}"]`);
                 if (cardElement) {
@@ -1000,7 +1090,6 @@
         }
     }
 
-    // --- Share Functionality ---
     async function handleShareClick(movieId) {
         const movie = getMovieById(movieId);
         if (!movie) {
@@ -1084,8 +1173,8 @@
     function renderMovieCards(moviesToRender = moviesData) {
         movieGridContainer.innerHTML = '';
         if (moviesToRender.length === 0) {
-            if (moviesData.length === 0) {
-                 movieGridContainer.innerHTML = `<p class="no-results-message">No movies uploaded yet. Please log in as admin to add movies.</p>`;
+            if (moviesData.length === 0) { 
+                 movieGridContainer.innerHTML = `<p class="no-results-message">No movies available. Admin can add movies. <br><strong>Note:</strong> Locally uploaded files (not URLs) will show here after adding, but won't play video/show poster after page reload due to browser limitations.</p>`;
             } else { 
                  movieGridContainer.innerHTML = `<p class="no-results-message">😕 No movies found matching your criteria.</p>`;
             }
@@ -1116,9 +1205,10 @@
             
             const isLiked = hasUserLiked(movie.id);
             const likeIconChar = isLiked ? '♥' : '♡';
+            let posterSource = movie.posterSrc;
 
             card.innerHTML = `
-                <img src="${movie.posterSrc}" alt="${movie.title}" loading="lazy" onerror="this.onerror=null;this.src='https://via.placeholder.com/190x300.png?text=Poster+Error';">
+                <img src="${posterSource}" alt="${movie.title}" loading="lazy" onerror="this.onerror=null;this.src='https://via.placeholder.com/190x300.png?text=Poster+Error';this.alt='Poster failed to load. Check URL/permissions.';">
                 <div class="movie-card-content">
                     <div>
                         <h3>${movie.title}</h3>
@@ -1147,6 +1237,8 @@
         return moviesData.find(m => m.id === id);
     }
     
+    let currentVideoOnErrorHandler = null; 
+
     function loadMovie(movieId) {
         const movie = getMovieById(movieId);
         if (!movie) { console.error("Movie not found!"); return; }
@@ -1155,12 +1247,17 @@
 
         if (adTimer) clearTimeout(adTimer);
 
-        videoWrapper.classList.add('hidden');
+        // Hide both players and clear sources initially
+        videoWrapper.classList.add('hidden'); // Keep main wrapper hidden until ad finishes
+        mainMoviePlayer.classList.add('hidden');
+        youtubePlayerIframe.classList.add('hidden');
+        
         mainMoviePlayer.pause();
-        mainMoviePlayer.currentTime = 0;
         if (mainMoviePlayer.querySelector('source')) {
             mainMoviePlayer.querySelector('source').src = "";
         }
+        mainMoviePlayer.src = ""; // Also clear direct src if set
+        youtubePlayerIframe.src = "";
 
 
         adPreroll.classList.remove('hidden'); 
@@ -1177,7 +1274,6 @@
         playerShareButton.onclick = () => handleShareClick(movieId);
         playerShareButton.classList.remove('hidden');
 
-
         if (document.getElementById('player-section').classList.contains('hidden')) {
             document.getElementById('player-section').classList.remove('hidden');
         }
@@ -1185,58 +1281,133 @@
             document.getElementById('movies').classList.remove('hidden');
         }
 
+        let videoSourceToLoad = movie.videoSrc;
+        const isYouTube = movie.isYouTube; // Get the flag from movie data
+
+        if (!isYouTube && videoSourceToLoad && videoSourceToLoad.startsWith('blob:') && !movie._wasBlobLoadedThisSession) {
+             playingMovieTitleElement.textContent = `Error: ${movie.title} (Temporary file, reload page to clear)`;
+             movieDescriptionPlayer.textContent = "This video was from a temporary local file upload. Temporary files do not persist after page reload. Please use permanent URLs for videos.";
+             adPreroll.classList.add('hidden'); 
+             return; 
+        }
+
+        // Remove previous HTML5 video error handler if any
+        if (currentVideoOnErrorHandler) {
+            mainMoviePlayer.removeEventListener('error', currentVideoOnErrorHandler);
+            currentVideoOnErrorHandler = null;
+        }
+
+        // Define new error handler for HTML5 video
+        if (!isYouTube) {
+            currentVideoOnErrorHandler = function(e) {
+                console.error("HTML5 Video player error event:", e);
+                console.error("Video error object:", mainMoviePlayer.error);
+                let errorMsg = "An unknown error occurred while trying to play the video.";
+                if (mainMoviePlayer.error) {
+                    switch (mainMoviePlayer.error.code) {
+                        case MediaError.MEDIA_ERR_ABORTED: errorMsg = 'Video playback aborted.'; break;
+                        case MediaError.MEDIA_ERR_NETWORK:
+                            errorMsg = 'Network error. Check connection.';
+                            if (videoSourceToLoad.includes('drive.google.com')) {
+                                errorMsg += ' For Google Drive: file unavailable, too large, or restricted (quota).';
+                            }
+                            break;
+                        case MediaError.MEDIA_ERR_DECODE: errorMsg = 'Video corrupted or unsupported features.'; break;
+                        case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                            errorMsg = 'Video format not supported or URL incorrect/inaccessible.';
+                            if (videoSourceToLoad.includes('drive.google.com')) {
+                                errorMsg += ' For Google Drive: check share link, permissions, and GDrive restrictions (virus scan, quota). Try opening GDrive download link directly.';
+                            } else if (videoSourceToLoad.startsWith('blob:')) {
+                                errorMsg += ' If temporary local file, it might be invalid after reload.';
+                            }
+                            break;
+                        default: errorMsg = `Unknown video error. Code: ${mainMoviePlayer.error.code}.`;
+                    }
+                }
+                playingMovieTitleElement.textContent = `Error Playing: ${movie.title}`;
+                movieDescriptionPlayer.textContent = errorMsg;
+                videoWrapper.classList.add('hidden'); 
+                adPreroll.classList.add('hidden'); 
+            };
+            mainMoviePlayer.addEventListener('error', currentVideoOnErrorHandler);
+        }
+
 
         adTimer = setTimeout(() => {
-            adPreroll.classList.add('hidden'); // Hide the preroll ad container after 1.5s
-            videoWrapper.classList.remove('hidden');
+            adPreroll.classList.add('hidden'); 
+            videoWrapper.classList.remove('hidden'); // Show the main video container
             
-            if (mainMoviePlayer.querySelector('source')) {
-                 mainMoviePlayer.querySelector('source').src = movie.videoSrc;
-            } else { 
-                const sourceEl = document.createElement('source');
-                sourceEl.src = movie.videoSrc;
-                sourceEl.type = "video/mp4";
-                mainMoviePlayer.appendChild(sourceEl);
+            if (isYouTube) {
+                youtubePlayerIframe.src = videoSourceToLoad; // Already embed URL with autoplay=1
+                youtubePlayerIframe.classList.remove('hidden');
+                mainMoviePlayer.classList.add('hidden');
+                
+                playingMovieTitleElement.textContent = `Now Playing: ${movie.title}`;
+                movieDescriptionPlayer.textContent = movie.description;
+                // YouTube iframe handles its own play/error states internally mostly.
+                // Autoplay might be blocked by browser, user might need to click play in iframe.
+                
+            } else { // GDrive or direct MP4
+                const sourceElement = mainMoviePlayer.querySelector('source') || document.createElement('source');
+                sourceElement.src = videoSourceToLoad;
+                sourceElement.type = "video/mp4"; 
+                if (!mainMoviePlayer.querySelector('source')) {
+                    mainMoviePlayer.appendChild(sourceElement);
+                }
+                mainMoviePlayer.load(); 
+                mainMoviePlayer.play().then(() => {
+                    playingMovieTitleElement.textContent = `Now Playing: ${movie.title}`;
+                    movieDescriptionPlayer.textContent = movie.description;
+                }).catch(playError => {
+                    console.warn("Autoplay prevented or error during play initiation for HTML5 video:", playError);
+                    if (!playingMovieTitleElement.textContent.startsWith('Error Playing:')) {
+                         playingMovieTitleElement.textContent = `Could not auto-play: ${movie.title}`;
+                         movieDescriptionPlayer.textContent = "Video playback could not be started automatically. You might need to click play.";
+                    }
+                });
+                mainMoviePlayer.classList.remove('hidden');
+                youtubePlayerIframe.classList.add('hidden');
             }
-            mainMoviePlayer.load();
-            mainMoviePlayer.play().catch(error => console.warn("Autoplay prevented:", error));
-            
-            playingMovieTitleElement.textContent = `Now Playing: ${movie.title}`;
-            movieDescriptionPlayer.textContent = movie.description;
             
             document.getElementById('player-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             movie.views = (movie.views || 0) + 1;
+            saveMoviesToLocalStorage(); 
             if(isAdminLoggedIn()) {
                 updateStatsAndAnalysis(); 
             }
         }, 1500); 
     }
 
-    // --- Admin Functions ---
     function isAdminLoggedIn() {
         return !adminDashboardSection.classList.contains('hidden');
     }
 
     function deleteMovie(movieId) {
+        if (!isAdminLoggedIn()) { 
+            displayAdminDashboardMessage('Unauthorized: Only admins can delete movies.', 'error');
+            return;
+        }
+
         const movieToDelete = moviesData.find(m => m.id === movieId);
         if (!movieToDelete) {
             displayAdminDashboardMessage('Error: Movie not found for deletion.', 'error');
             return;
         }
 
-        if (confirm(`Are you sure you want to delete "${movieToDelete.title}"? This action cannot be undone.`)) {
-            if (movieToDelete.videoSrc && movieToDelete.videoSrc.startsWith('blob:')) {
-                URL.revokeObjectURL(movieToDelete.videoSrc);
-            }
-            if (movieToDelete.posterSrc && movieToDelete.posterSrc.startsWith('blob:')) {
+        if (confirm(`Are you sure you want to delete "${movieToDelete.title}"? This action cannot be undone from LocalStorage.`)) {
+            if (movieToDelete.posterSrc && movieToDelete.posterSrc.startsWith('blob:') && movieToDelete._wasBlobLoadedThisSession) {
                 URL.revokeObjectURL(movieToDelete.posterSrc);
+            }
+             if (movieToDelete.videoSrc && movieToDelete.videoSrc.startsWith('blob:') && movieToDelete._wasBlobLoadedThisSession && !movieToDelete.isYouTube) { // Check not YouTube for video blob
+                URL.revokeObjectURL(movieToDelete.videoSrc);
             }
 
             moviesData = moviesData.filter(movie => movie.id !== movieId);
+            saveMoviesToLocalStorage(); 
             renderMovieCards(filterMovies(searchInput.value)); 
             updateStatsAndAnalysis(); 
-            displayAdminDashboardMessage(`Movie "${movieToDelete.title}" deleted successfully.`, 'success');
+            displayAdminDashboardMessage(`Movie "${movieToDelete.title}" deleted successfully from local records.`, 'success');
 
             if (currentMoviePlayingId === movieId) {
                 playingMovieTitleElement.textContent = "Select a movie to play";
@@ -1248,9 +1419,14 @@
                 playerLikeButton.onclick = null;
                 playerShareButton.classList.add('hidden'); 
                 playerShareButton.onclick = null;
+                
                 videoWrapper.classList.add('hidden');
+                mainMoviePlayer.classList.add('hidden');
+                youtubePlayerIframe.classList.add('hidden');
                 mainMoviePlayer.pause();
                 if(mainMoviePlayer.querySelector('source')) mainMoviePlayer.querySelector('source').src = "";
+                mainMoviePlayer.src = "";
+                youtubePlayerIframe.src = "";
                 currentMoviePlayingId = null;
             }
         }
@@ -1279,7 +1455,7 @@
             const deleteBtn = document.createElement('button');
             deleteBtn.classList.add('delete-btn');
             deleteBtn.textContent = 'Delete';
-            deleteBtn.onclick = () => deleteMovie(movie.id);
+            deleteBtn.onclick = () => deleteMovie(movie.id); 
             actionsCell.appendChild(deleteBtn);
         });
     }
@@ -1382,11 +1558,11 @@
         const genre = document.getElementById('movieGenreUpload').value.trim();
         const description = document.getElementById('movieDescriptionUpload').value.trim();
 
-        const posterUrl = document.getElementById('moviePosterUrl').value.trim();
-        const posterFile = document.getElementById('moviePosterFile').files[0];
+        let posterUrlInputVal = document.getElementById('moviePosterUrl').value.trim();
+        const posterFileInput = document.getElementById('moviePosterFile').files[0];
         
-        const videoUrl = document.getElementById('movieVideoUrlFallback').value.trim();
-        const videoFile = document.getElementById('movieVideoFile').files[0];
+        let videoUrlInputVal = document.getElementById('movieVideoUrlFallback').value.trim();
+        const videoFileInput = document.getElementById('movieVideoFile').files[0];
 
         if (!title || !genre || !description) {
             displayFormMessage('Please fill in Movie Title, Genre, and Description.', 'error');
@@ -1394,26 +1570,57 @@
         }
 
         let actualPosterSrc;
-        let posterIsFromUrl = false;
-        if (posterUrl) {
-            actualPosterSrc = posterUrl;
-            posterIsFromUrl = true;
-        } else if (posterFile) {
-            actualPosterSrc = URL.createObjectURL(posterFile);
+        let posterIsTemporaryBlob = false;
+        let posterIsGoogleDrive = false;
+
+        if (posterUrlInputVal) {
+            if (posterUrlInputVal.includes('drive.google.com')) {
+                const gDriveThumbnailUrl = convertToGoogleDriveThumbnailUrl(posterUrlInputVal);
+                if (gDriveThumbnailUrl) {
+                    actualPosterSrc = gDriveThumbnailUrl;
+                    posterIsGoogleDrive = true;
+                } else {
+                    actualPosterSrc = posterUrlInputVal; 
+                    displayFormMessage('Could not convert Google Drive poster link. Check link format. Using original link.', 'error');
+                }
+            } else {
+                actualPosterSrc = posterUrlInputVal;
+            }
+        } else if (posterFileInput) {
+            actualPosterSrc = URL.createObjectURL(posterFileInput);
+            posterIsTemporaryBlob = true;
         } else {
-            displayFormMessage('Please provide a Poster URL or upload a Poster Image File.', 'error');
+            displayFormMessage('Please provide a Poster Link (URL or Google Drive) or upload a Poster File.', 'error');
             return;
         }
 
         let actualVideoSrc;
-        let videoIsFromUrl = false;
-        if (videoUrl) {
-            actualVideoSrc = videoUrl;
-            videoIsFromUrl = true;
-        } else if (videoFile) {
-            actualVideoSrc = URL.createObjectURL(videoFile);
+        let videoIsTemporaryBlob = false;
+        let videoIsGoogleDrive = false;
+        let videoIsYouTube = false;
+
+        if (videoUrlInputVal) {
+            const youtubeId = getYouTubeVideoId(videoUrlInputVal);
+            if (youtubeId) {
+                actualVideoSrc = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0&modestbranding=1`;
+                videoIsYouTube = true;
+            } else if (videoUrlInputVal.includes('drive.google.com')) {
+                const gDriveVideoUrl = convertToGoogleDriveEmbedVideoUrl(videoUrlInputVal);
+                if (gDriveVideoUrl) {
+                    actualVideoSrc = gDriveVideoUrl;
+                    videoIsGoogleDrive = true;
+                } else {
+                    actualVideoSrc = videoUrlInputVal; 
+                    displayFormMessage('Could not convert Google Drive video link. Check link format. Using original link.', 'error');
+                }
+            } else { // Assume direct MP4 or other streamable URL
+                actualVideoSrc = videoUrlInputVal;
+            }
+        } else if (videoFileInput) {
+            actualVideoSrc = URL.createObjectURL(videoFileInput);
+            videoIsTemporaryBlob = true;
         } else {
-            displayFormMessage('Please provide a Video URL or upload a Video File.', 'error');
+            displayFormMessage('Please provide a Video Link (URL, Google Drive, YouTube) or upload a Video File.', 'error');
             return;
         }
         
@@ -1423,25 +1630,41 @@
             genre, 
             posterSrc: actualPosterSrc, 
             videoSrc: actualVideoSrc,
+            isYouTube: videoIsYouTube, // Store if it's a YouTube video
             description,
             views: 0, 
-            likes: 0
+            likes: 0,
+            _wasBlobLoadedThisSession: posterIsTemporaryBlob || (videoIsTemporaryBlob && !videoIsYouTube) // Only mark blob if it's not YT
         };
         moviesData.push(newMovie);
+        saveMoviesToLocalStorage(); 
         renderMovieCards(filterMovies(searchInput.value)); 
         updateStatsAndAnalysis(); 
         
-        let successMessage = `Movie '${title}' added successfully.`;
-        if (!posterIsFromUrl || !videoIsFromUrl) {
-            let temporaryParts = [];
-            if (!posterIsFromUrl && posterFile) temporaryParts.push("poster image");
-            if (!videoIsFromUrl && videoFile) temporaryParts.push("video");
-            
-            if (temporaryParts.length > 0) {
-                successMessage += ` IMPORTANT: The ${temporaryParts.join(' and ')} from uploaded file(s) are temporary and will likely NOT work for others when hosted. For public hosting, always use direct URLs.`;
-            }
+        let successMessage = `Movie '${title}' added.`;
+        if (posterIsGoogleDrive) successMessage += " Poster from Google Drive.";
+        if (videoIsGoogleDrive) successMessage += " Video from Google Drive.";
+        if (videoIsYouTube) successMessage += " Video from YouTube.";
+        
+        let isAnyPartTemporary = false;
+        let temporaryPartsMessage = [];
+
+        if (posterIsTemporaryBlob) {
+            temporaryPartsMessage.push("poster image");
+            isAnyPartTemporary = true;
         }
-        displayFormMessage(successMessage, 'success');
+        if (videoIsTemporaryBlob && !videoIsYouTube) { // Only count non-YouTube file uploads as temporary
+            temporaryPartsMessage.push("video file");
+            isAnyPartTemporary = true;
+        }
+            
+        if (isAnyPartTemporary) {
+            let partsString = temporaryPartsMessage.join(' and ');
+            successMessage += `\n\n🚨 **IMPORTANT WARNING!** 🚨\nThe ${partsString} you uploaded from your computer is TEMPORARY. It will DISAPPEAR if you reload the page or close/reopen the browser. For permanent storage, use URL fields.`;
+            displayFormMessage(successMessage, 'error'); 
+        } else {
+            displayFormMessage(successMessage, 'success');
+        }
         uploadMovieForm.reset();
     });
 
@@ -1476,7 +1699,6 @@
 
 
     function setActiveSection(targetSectionIdOrElement) {
-        // Hide all main sections within .content-area and also top-level admin sections if not in .content-area
         document.querySelectorAll('.content-area > section, main > section.admin-section').forEach(s => s.classList.add('hidden'));
         
         let targetSection;
@@ -1489,25 +1711,17 @@
         if (targetSection) {
             targetSection.classList.remove('hidden');
             
-            // Special handling for admin sections to ensure main movie/player are hidden
             if (targetSection.id === 'adminLoginSection' || targetSection.id === 'adminDashboardSection') {
                 document.getElementById('movies').classList.add('hidden');
-                // Keep player visible if it's already playing, otherwise hide it
                 if (videoWrapper.classList.contains('hidden')) { 
                      document.getElementById('player-section').classList.add('hidden');
                 } else {
                      document.getElementById('player-section').classList.remove('hidden');
                 }
-            } else { // For non-admin sections, ensure movie list and player section are potentially visible
+            } else { 
                  document.getElementById('movies').classList.remove('hidden');
                  document.getElementById('player-section').classList.remove('hidden');
-
-                 // If navigating to home, ensure player section is visible but video might be reset
-                 if(targetSection.id === 'movies' && !currentMoviePlayingId) {
-                    // If no movie is playing, ensure player shows placeholder
-                 }
             }
-             // Scroll to target section
             const rect = targetSection.getBoundingClientRect();
              if (rect.top < parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height-desktop')) || rect.bottom > window.innerHeight) {
                   targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1572,26 +1786,27 @@
              setActiveSection('player-section');
         } else if (hash === "#adminLoginSection" || hash === "#adminDashboardSection") {
             setActiveSection(hash.substring(1));
-        } else if (hash) { // Handle other direct hash links like #adminLoginBtn (though usually handled by nav click)
+        } else if (hash) { 
             const targetElement = document.getElementById(hash.substring(1));
             if (targetElement && (targetElement.classList.contains('admin-section') || targetElement.classList.contains('movie-listing-section') || targetElement.classList.contains('movie-player-section'))) {
                 setActiveSection(targetElement);
             } else {
-                 setActiveSection('movies'); // Default fallback
+                 setActiveSection('movies'); 
             }
         } else {
-            setActiveSection('movies'); // Default view
+            setActiveSection('movies'); 
         }
     }
     
     document.addEventListener('DOMContentLoaded', () => {
+        loadMoviesFromLocalStorage(); 
         renderMovieCards(); 
         updateStatsAndAnalysis(); 
         
         const homeLink = document.querySelector('header nav ul li a[href="#home"]');
         if (homeLink) homeLink.classList.add('active');
 
-        if (!mainMoviePlayer.querySelector('source') || mainMoviePlayer.querySelector('source').src === "") {
+        if (!mainMoviePlayer.src && !youtubePlayerIframe.src) {
             playingMovieTitleElement.textContent = "Select a movie to play";
             movieDescriptionPlayer.textContent = "Description will appear here.";
             movieGenrePlayer.textContent = "N/A";
